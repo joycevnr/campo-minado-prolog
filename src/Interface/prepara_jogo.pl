@@ -100,7 +100,6 @@ seleciona_opcao(2,L,C) :-
 seleciona_opcao(3,_,_) :- show_cursor, clear.
 
 
-
 /* ---------------------------------------------------------
    iniciar(+Tamanho, +Linha, +Coluna)
 
@@ -131,5 +130,33 @@ jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
     marca_cursor(CL,CC),
     get_single_char(Code),
     apaga_cursor(CL,CC),
-    novo_cursor(Code,CL,CC,Lmin,Cmin,LMax,CMax,NL,NC),
-    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N). 
+    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N).
+
+/* ---------------------------------------------------------
+   processa_tecla(+CodigoTecla, +Lmin, +Cmin, +LMax, +CMax,
+                  +LinhaAtual, +ColunaAtual, +N)
+
+    Processa a tecla pressionada:
+     - ESPAÇO (32)      : Planta a Bandeira ('P')
+     - ENTER (13 ou 10) : Abre a célula ('0')
+     - Q / q (81 / 113) : Sai do jogo (halt)
+     - Qualquer outra   : Trata como movimento (WASD/Setas)
+
+--------------------------------------------------------- */
+processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+    desenha_bandeira(CL, CC),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+
+processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+    desenha_abrir(CL, CC),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+    desenha_abrir(CL, CC),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+
+processa_tecla(113, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(81, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+
+processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+    novo_cursor(Code, CL, CC, Lmin, Cmin, LMax, CMax, NL, NC),
+    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N).

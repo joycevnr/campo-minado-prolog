@@ -109,7 +109,7 @@ Este projeto utiliza o **SWI-Prolog** como ambiente de desenvolvimento e execuç
 
     ```prolog
     ?- ['src/main.pl'].
-    ?- main.
+    ?- jogar.
     ```
 
 ---

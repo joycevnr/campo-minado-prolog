@@ -132,3 +132,29 @@ novo_cursor(68,L,C,_,Cmin,_,CMax,L,NC) :-
     NC0 is C-4, clamp(Cmin,CMax,NC0,NC).
 
 novo_cursor(_,L,C,_,_,_,_,L,C).
+
+/* ---------------------------------------------------------
+   desenha_bandeira(+Linha, +Coluna)
+
+   Desenha um 'P' amarelo no centro da célula indicada
+   pelo cursor. Utiliza o código ANSI \33[33m.
+--------------------------------------------------------- */
+desenha_bandeira(L, C) :-
+    MeioL is L + 1,
+    MeioC is C + 2,
+    move_to(MeioL, MeioC),
+    write('\33[33mP\33[0m'),
+    flush_output.
+
+/* ---------------------------------------------------------
+   desenha_abrir(+Linha, +Coluna)
+
+   Desenha um '0' no centro da célula indicada pelo cursor
+   para simular a abertura de uma área vazia.
+--------------------------------------------------------- */
+desenha_abrir(L, C) :-
+    MeioL is L + 1,
+    MeioC is C + 2,
+    move_to(MeioL, MeioC),
+    write('0'),
+    flush_output.
