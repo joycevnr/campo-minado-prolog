@@ -1,6 +1,7 @@
+
 :- ['interface.pl'].
 :- ['cursor.pl'].
-
+:- ['../Jogo/regras_jogo.pl'].
 
 
 /* ---------------------------------------------------------
@@ -111,6 +112,7 @@ seleciona_opcao(3,_,_) :- show_cursor, clear.
 iniciar(N,L,C) :-
     clear,
     desenha_tabuleiro(L,C,N),
+    iniciar_logica(N),
     Lmax is L+((N-1)*2),
     Cmax is C+((N-1)*4),
     jogo(L,C,Lmax,Cmax,L,C,N).
@@ -148,10 +150,10 @@ processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
     jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
 
 processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
-    desenha_abrir(CL, CC),
+    abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
     jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
 processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
-    desenha_abrir(CL, CC),
+    abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
     jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
 
 processa_tecla(113, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
@@ -160,3 +162,4 @@ processa_tecla(81, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
 processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N) :-
     novo_cursor(Code, CL, CC, Lmin, Cmin, LMax, CMax, NL, NC),
     jogo(Lmin,Cmin,LMax, CMax, NL, NC, N).
+
