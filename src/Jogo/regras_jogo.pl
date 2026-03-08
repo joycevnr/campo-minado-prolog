@@ -1,11 +1,13 @@
 :- module(regras_jogo, [
     iniciar_logica/1,
-    abrir_celula/6
+    abrir_celula/6,
+    checa_vitoria/1,
+    tabuleiro/1          
 ]).
 
 :- use_module(library(random)).
-
 :- dynamic tabuleiro/1.
+
 
 /* -------------------------------------------------
    iniciar_logica(+N)
@@ -90,12 +92,14 @@ abrir_celula(Lmin,Cmin,CL,CC,_,_) :-
 
     (
         Info == bomba ->
-            write('*')
+            write('*'), 
+            encerra_jogo_derrota
         ;
             write(Info)
     ),
 
     flush_output.
+
 
 /* 
    info_celula(+Tab,+L,+C,-Info)
@@ -126,6 +130,23 @@ contar_bombas(Tab,L,C,Total) :-
         ),
     Lista),
     length(Lista,Total).
+
+/*
+    Verifica se o jogador já detectou todas as bombas
+    e marcou com as bandeiras
+*/
+
+checa_vitoria(Tab) :-
+    posicoes_bombas(Tab, Posbomba),
+    msort(Posbomba, PBomba),
+    lista_bandeiras(Lbandeira),
+    msort(Lbandeira, PBandeira),
+    (
+        PBomba = PBandeira
+        -> encerra_jogo_vitoria
+        ; true
+    ).
+
 
 
 vizinho(L,C,L1,C1) :-

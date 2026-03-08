@@ -1,4 +1,6 @@
 :- use_module(library(random)).
+:- dynamic bandeira/2.
+:- dynamic contador_bandeiras/1.
 
 /* 
    Cria matriz NxN preenchida com 0
@@ -128,3 +130,57 @@ posicao_valida(Tabuleiro,L,C) :-
     length(Tabuleiro,N),
     L >= 1, L =< N,
     C >= 1, C =< N.
+
+/*
+    Inicializa o contador de bombas
+*/
+
+iniciar_contador :-
+    retractall(contador_bandeiras(_)),
+    assertz(contador_bandeiras(0)).
+    %format('Contador iniciado: 0~n').
+
+
+/*
+   Recebe o tabuleiro e retorna uma lista com todas 
+   as posições que possuem bombas
+*/
+
+posicoes_bombas(Tab, Lista) :-
+    findall((L,C),
+        (
+            nth1(L, Tab, Linha),
+            nth1(C, Linha, bomba)
+        ),
+        Lista).
+
+
+/*
+    Incrementa o contador de bandeiras em 1
+*/
+
+incrementa_bandeiras :-
+    contador_bandeiras(N),
+    N1 is N + 1,
+    retract(contador_bandeiras(N)),
+    assertz(contador_bandeiras(N1)).
+
+
+/*
+   adiciona uma bandeira a uma posição se ainda não houver
+*/
+
+manipula_bandeira(CL,CC,Lmin,Cmin) :-
+    Linha is ((CL-Lmin)//2)+1,
+    Coluna is ((CC-Cmin)//4)+1,
+    (   bandeira(Linha,Coluna)
+    ->  true
+    ;   assertz(bandeira(Linha,Coluna)), incrementa_bandeiras
+    ).
+
+/*
+    Retorna uma lista com todas as posições de bandeiras
+*/
+
+lista_bandeiras(Lista) :-
+    findall((L,C), bandeira(L,C), Lista).

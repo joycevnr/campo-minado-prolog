@@ -1,7 +1,7 @@
-
 :- ['interface.pl'].
 :- ['cursor.pl'].
-:- ['../Jogo/regras_jogo.pl'].
+
+:- use_module('../Jogo/regras_jogo.pl', [checa_vitoria/1, tabuleiro/1]).
 
 
 /* ---------------------------------------------------------
@@ -89,15 +89,18 @@ menu_loop(Index, L, Col) :-
 seleciona_opcao(0,L,C) :- 
     LimiteL is L-9,
     LimiteC is C-18,
-    iniciar(9,LimiteL,LimiteC).
+    Bombas is 9,
+    iniciar(9,LimiteL,LimiteC,Bombas).
 seleciona_opcao(1,L,C) :- 
     LimiteL is L-16,
     LimiteC is C-32,
-    iniciar(16,LimiteL,LimiteC).
+    Bombas is 16,
+    iniciar(16,LimiteL,LimiteC,Bombas).
 seleciona_opcao(2,L,C) :- 
     LimiteL is L-21,
     LimiteC is C-42,
-    iniciar(21,LimiteL,LimiteC).
+    Bombas is 21,
+    iniciar(21,LimiteL,LimiteC,Bombas).
 seleciona_opcao(3,_,_) :- show_cursor, clear.
 
 
@@ -109,13 +112,24 @@ seleciona_opcao(3,_,_) :- show_cursor, clear.
    - Calcula limites máximos do cursor
    - Inicia loop principal do jogo
 --------------------------------------------------------- */
-iniciar(N,L,C) :-
+iniciar(N,L,C,Bombas) :-
     clear,
     desenha_tabuleiro(L,C,N),
     iniciar_logica(N),
+    iniciar_contador,
     Lmax is L+((N-1)*2),
     Cmax is C+((N-1)*4),
-    jogo(L,C,Lmax,Cmax,L,C,N).
+    jogo(L,C,Lmax,Cmax,L,C,N,Bombas).
+
+/*
+    Desenha na tela o placar de bandeiras restantes
+*/
+
+desenha_placar(Lmin, Cmin, Bombas) :-
+    contador_bandeiras(N),
+    R is (Bombas - N),
+    move_to(Lmin - 2, Cmin),
+    format('Bandeiras restantes: ~w',[R]).
 
 /* ---------------------------------------------------------
    jogo(+Lmin, +Cmin, +Lmax, +Cmax,
@@ -128,15 +142,16 @@ iniciar(N,L,C) :-
    - Continua recursivamente
 
 --------------------------------------------------------- */
-jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :-
+    desenha_placar(Lmin,Cmin,Bombas),
     marca_cursor(CL,CC),
     get_single_char(Code),
     apaga_cursor(CL,CC),
-    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N).
+    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N,Bombas).
 
 /* ---------------------------------------------------------
    processa_tecla(+CodigoTecla, +Lmin, +Cmin, +LMax, +CMax,
-                  +LinhaAtual, +ColunaAtual, +N)
+                  +LinhaAtual, +ColunaAtual, +N, NBombas)
 
     Processa a tecla pressionada:
      - ESPAÇO (32)      : Planta a Bandeira ('P')
@@ -145,21 +160,24 @@ jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
      - Qualquer outra   : Trata como movimento (WASD/Setas)
 
 --------------------------------------------------------- */
-processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
+    tabuleiro(Tab),
     desenha_bandeira(CL, CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+    manipula_bandeira(CL,CC, Lmin, Cmin),
+    checa_vitoria(Tab),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
 
-processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
     abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
-processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
+processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
     abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
 
-processa_tecla(113, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
-processa_tecla(81, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(113, _, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(81, _, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
 
-processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :-
     novo_cursor(Code, CL, CC, Lmin, Cmin, LMax, CMax, NL, NC),
-    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N).
+    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N, Bombas).
 
