@@ -25,7 +25,7 @@ tamanho(Linhas, Colunas) :-
     ),
     !,
     format('TAMANHO INSUFICIENTE!~n', []),
-    format('Atual: ~w x ~w | Necessário: 85 x 50~n', [Colunas, Linhas]),
+    format('Atual: ~w x ~w | Necessário:85 x 50~n', [Colunas, Linhas]),
     fail.
 
 tamanho(Linhas, Colunas) :-
@@ -74,7 +74,7 @@ menu_loop(Index, L, Col) :-
     get_single_char(Comando),
     limpa_seta(Index, L, Col),
     ((Comando =:= 10 ; Comando =:= 13) ->
-       seleciona_opcao(Index,L,Col);
+       seleciona_opcao(Index,L,Col+10);
        novo_index(Comando, Index, NovoIndex),
        menu_loop(NovoIndex, L, Col)).
 
@@ -103,6 +103,13 @@ seleciona_opcao(2,L,C) :-
     iniciar(21,LimiteL,LimiteC,Bombas).
 seleciona_opcao(3,_,_) :- show_cursor, clear.
 
+/*----------------------------------------------------------
+    instrucoes(+Linha)
+
+    -Imprime as instruções do jogo na tela.
+----------------------------------------------------------*/
+instrucoes(L):-
+    move_to(L,0), write("INSTRUÇÕES: \n+ Use WASD ou SETAS para se mover\n+ ESPAÇO: Bandeira | ENTER: Abrir\n+ Pressione q para sair").
 
 /* ---------------------------------------------------------
    iniciar(+Tamanho, +Linha, +Coluna)
@@ -115,6 +122,7 @@ seleciona_opcao(3,_,_) :- show_cursor, clear.
 iniciar(N,L,C,Bombas) :-
     clear,
     desenha_tabuleiro(L,C,N),
+    instrucoes(L+N*2+2),
     iniciar_logica(N),
     iniciar_contador,
     Lmax is L+((N-1)*2),
