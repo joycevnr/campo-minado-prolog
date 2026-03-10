@@ -138,8 +138,6 @@ posicao_valida(Tabuleiro,L,C) :-
 iniciar_contador :-
     retractall(contador_bandeiras(_)),
     assertz(contador_bandeiras(0)).
-    %format('Contador iniciado: 0~n').
-
 
 /*
    Recebe o tabuleiro e retorna uma lista com todas 
@@ -165,18 +163,42 @@ incrementa_bandeiras :-
     retract(contador_bandeiras(N)),
     assertz(contador_bandeiras(N1)).
 
+/*
+    Incrementa o contador de bandeiras em 1
+*/
+
+decrementa_bandeiras :-
+    contador_bandeiras(N),
+    N1 is N - 1,
+    retract(contador_bandeiras(N)),
+    assertz(contador_bandeiras(N1)).
+
 
 /*
-   adiciona uma bandeira a uma posição se ainda não houver
+   adiciona uma bandeira a uma posição se ainda não houver e
+   a remove se já tiver sido adicionada àquela posição
 */
 
 manipula_bandeira(CL,CC,Lmin,Cmin) :-
     Linha is ((CL-Lmin)//2)+1,
     Coluna is ((CC-Cmin)//4)+1,
     (   bandeira(Linha,Coluna)
-    ->  true
+    ->  retract(bandeira(Linha,Coluna)), decrementa_bandeiras, apaga_bandeira(CL,CC)
     ;   assertz(bandeira(Linha,Coluna)), incrementa_bandeiras
     ).
+
+/*
+    Apaga uma bandeira do tabuleiro e da lista de bandeiras se
+    o usuário seleciona espaco em uma casa que já possui
+    uma bandeira
+*/
+
+apaga_bandeira(L, C) :-
+    MeioL is L + 1,
+    MeioC is C + 2,
+    move_to(MeioL, MeioC),
+    write(' '),
+    flush_output.
 
 /*
     Retorna uma lista com todas as posições de bandeiras

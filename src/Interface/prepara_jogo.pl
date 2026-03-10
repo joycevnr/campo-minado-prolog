@@ -89,18 +89,15 @@ menu_loop(Index, L, Col) :-
 seleciona_opcao(0,L,C) :- 
     LimiteL is L-9,
     LimiteC is C-18,
-    Bombas is 9,
-    iniciar(9,LimiteL,LimiteC,Bombas).
+    iniciar(9,LimiteL,LimiteC).
 seleciona_opcao(1,L,C) :- 
     LimiteL is L-16,
     LimiteC is C-32,
-    Bombas is 16,
-    iniciar(16,LimiteL,LimiteC,Bombas).
+    iniciar(16,LimiteL,LimiteC).
 seleciona_opcao(2,L,C) :- 
     LimiteL is L-21,
     LimiteC is C-42,
-    Bombas is 21,
-    iniciar(21,LimiteL,LimiteC,Bombas).
+    iniciar(21,LimiteL,LimiteC).
 seleciona_opcao(3,_,_) :- show_cursor, clear.
 
 /*----------------------------------------------------------
@@ -119,7 +116,7 @@ instrucoes(L):-
    - Calcula limites máximos do cursor
    - Inicia loop principal do jogo
 --------------------------------------------------------- */
-iniciar(N,L,C,Bombas) :-
+iniciar(N,L,C) :-
     clear,
     desenha_tabuleiro(L,C,N),
     instrucoes(L+N*2+2),
@@ -127,7 +124,7 @@ iniciar(N,L,C,Bombas) :-
     iniciar_contador,
     Lmax is L+((N-1)*2),
     Cmax is C+((N-1)*4),
-    jogo(L,C,Lmax,Cmax,L,C,N,Bombas).
+    jogo(L,C,Lmax,Cmax,L,C,N).
 
 /*
     Desenha na tela o placar de bandeiras restantes
@@ -150,12 +147,15 @@ desenha_placar(Lmin, Cmin, Bombas) :-
    - Continua recursivamente
 
 --------------------------------------------------------- */
-jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :-
+jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+    tabuleiro(Tab),
+    posicoes_bombas(Tab, ListaB),
+    length(ListaB, Bombas),
     desenha_placar(Lmin,Cmin,Bombas),
     marca_cursor(CL,CC),
     get_single_char(Code),
     apaga_cursor(CL,CC),
-    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N,Bombas).
+    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N).
 
 /* ---------------------------------------------------------
    processa_tecla(+CodigoTecla, +Lmin, +Cmin, +LMax, +CMax,
@@ -168,24 +168,24 @@ jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :-
      - Qualquer outra   : Trata como movimento (WASD/Setas)
 
 --------------------------------------------------------- */
-processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
+processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
     tabuleiro(Tab),
     desenha_bandeira(CL, CC),
     manipula_bandeira(CL,CC, Lmin, Cmin),
     checa_vitoria(Tab),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
 
-processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
+processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
     abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
-processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :- !,
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
     abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas).
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
 
-processa_tecla(113, _, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
-processa_tecla(81, _, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(113, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(81, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
 
-processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N, Bombas) :-
+processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N) :-
     novo_cursor(Code, CL, CC, Lmin, Cmin, LMax, CMax, NL, NC),
-    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N, Bombas).
+    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N).
 
