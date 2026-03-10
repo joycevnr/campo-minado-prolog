@@ -1,7 +1,7 @@
 :- module(regras_jogo, [
     iniciar_logica/1,
-    abrir_celula/6,
-    checa_vitoria/1,
+    abrir_celula/8,
+    checa_vitoria/4,
     tabuleiro/1          
 ]).
 
@@ -80,7 +80,7 @@ substituir([H|T],I,X,[H|R]) :-
 
  */
 
-abrir_celula(Lmin,Cmin,CL,CC,_,_) :-
+abrir_celula(Lmin,Cmin,CL,CC,_,_,ThreadId,N) :-
     Linha is ((CL-Lmin)//2)+1,
     Coluna is ((CC-Cmin)//4)+1,
     tabuleiro(Tab),
@@ -93,7 +93,7 @@ abrir_celula(Lmin,Cmin,CL,CC,_,_) :-
     (
         Info == bomba ->
             write('*'), 
-            encerra_jogo_derrota
+            encerra_jogo_derrota(ThreadId,N)
         ;
             write(Info)
     ),
@@ -136,14 +136,14 @@ contar_bombas(Tab,L,C,Total) :-
     e marcou com as bandeiras
 */
 
-checa_vitoria(Tab) :-
+checa_vitoria(Tab, ThreadId, TempoIni, N) :-
     posicoes_bombas(Tab, Posbomba),
     msort(Posbomba, PBomba),
     lista_bandeiras(Lbandeira),
     msort(Lbandeira, PBandeira),
     (
         PBomba = PBandeira
-        -> encerra_jogo_vitoria
+        -> encerra_jogo_vitoria(ThreadId,TempoIni,N)
         ; true
     ).
 

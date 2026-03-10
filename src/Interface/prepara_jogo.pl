@@ -1,7 +1,7 @@
 :- ['interface.pl'].
 :- ['cursor.pl'].
 
-:- use_module('../Jogo/regras_jogo.pl', [checa_vitoria/1, tabuleiro/1]).
+:- use_module('../Jogo/regras_jogo.pl', [checa_vitoria/4, tabuleiro/1]).
 
 
 /* ---------------------------------------------------------
@@ -124,7 +124,12 @@ iniciar(N,L,C) :-
     iniciar_contador,
     Lmax is L+((N-1)*2),
     Cmax is C+((N-1)*4),
-    jogo(L,C,Lmax,Cmax,L,C,N).
+    tamanho(Lin,Col),
+    LinhaCro is Lin//2+N+1,
+    ColunaCro is Col//2-12,
+    get_time(TempoInicial),
+    thread_create(cronometro(TempoInicial, LinhaCro, ColunaCro), ThreadId, []),
+    jogo(L,C,Lmax,Cmax,L,C,N,ThreadId,TempoInicial).
 
 /*
     Desenha na tela o placar de bandeiras restantes
@@ -147,7 +152,7 @@ desenha_placar(Lmin, Cmin, Bombas) :-
    - Continua recursivamente
 
 --------------------------------------------------------- */
-jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni) :-
     tabuleiro(Tab),
     posicoes_bombas(Tab, ListaB),
     length(ListaB, Bombas),
@@ -155,7 +160,7 @@ jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
     marca_cursor(CL,CC),
     get_single_char(Code),
     apaga_cursor(CL,CC),
-    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N).
+    processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni).
 
 /* ---------------------------------------------------------
    processa_tecla(+CodigoTecla, +Lmin, +Cmin, +LMax, +CMax,
@@ -168,24 +173,24 @@ jogo(Lmin, Cmin, LMax, CMax, CL, CC, N) :-
      - Qualquer outra   : Trata como movimento (WASD/Setas)
 
 --------------------------------------------------------- */
-processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
+processa_tecla(32, Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni) :- !,
     tabuleiro(Tab),
     desenha_bandeira(CL, CC),
     manipula_bandeira(CL,CC, Lmin, Cmin),
-    checa_vitoria(Tab),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+    checa_vitoria(Tab, ThreadId, TempoIni, N),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni).
 
-processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
-    abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
-processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N) :- !,
-    abrir_celula(Lmin,Cmin,CL,CC,CL,CC),
-    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N).
+processa_tecla(13, Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni) :- !,
+    abrir_celula(Lmin,Cmin,CL,CC,CL,CC,ThreadId,N),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni).
+processa_tecla(10, Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni) :- !,
+    abrir_celula(Lmin,Cmin,CL,CC,CL,CC,ThreadId,N),
+    jogo(Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni).
 
-processa_tecla(113, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
-processa_tecla(81, _, _, _, _, _, _, _) :- !, show_cursor, clear, halt.
+processa_tecla(113, _, _, _, _, _, _, _, ThreadId, _) :- !, thread_signal(ThreadId, abort), show_cursor, clear, flush_output, halt.
+processa_tecla(81, _, _, _, _, _, _, _, ThreadId, _) :- !, thread_signal(ThreadId, abort), show_cursor, clear, flush_output, halt.
 
-processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N) :-
+processa_tecla(Code, Lmin, Cmin, LMax, CMax, CL, CC, N, ThreadId, TempoIni) :-
     novo_cursor(Code, CL, CC, Lmin, Cmin, LMax, CMax, NL, NC),
-    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N).
+    jogo(Lmin,Cmin,LMax, CMax, NL, NC, N, ThreadId, TempoIni).
 

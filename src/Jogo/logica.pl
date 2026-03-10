@@ -1,4 +1,6 @@
 :- use_module(library(random)).
+:- use_module(library(files)).
+:- use_module(library(readutil)).
 :- dynamic bandeira/2.
 :- dynamic contador_bandeiras/1.
 
@@ -206,3 +208,23 @@ apaga_bandeira(L, C) :-
 
 lista_bandeiras(Lista) :-
     findall((L,C), bandeira(L,C), Lista).
+
+/*
+    Lê o arquivo que contém os tempos já registrados
+*/
+ler_arquivo(Dados) :-
+    ( exists_file('tempos.txt') ->
+        open('tempos.txt', read, Stream),
+        read(Stream, Dados),
+        close(Stream)
+    ;   Dados = ([],[],[])
+    ).
+
+/*
+    Grava no arquivo o conteúdo recebido
+*/
+grava_arquivo(NovosTempos) :-
+    open('tempos.txt', write, Stream),
+    write(Stream, NovosTempos),
+    write(Stream, '.'),
+    close(Stream).
