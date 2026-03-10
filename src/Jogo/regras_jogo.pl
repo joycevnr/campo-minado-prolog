@@ -44,12 +44,17 @@ espalhar_bombas(Tab, N, NovoTab) :-
     espalhar(Bombas, Tab, N, NovoTab).
 
 espalhar(0, Tab, _, Tab).
+
 espalhar(K, Tab, N, NovoTab) :-
     random_between(1, N, L),
     random_between(1, N, C),
-    colocar_bomba(Tab, L, C, TabTemp),
-    K1 is K - 1,
-    espalhar(K1, TabTemp, N, NovoTab).
+
+    (   eh_bomba(Tab, L, C)
+    ->  espalhar(K, Tab, N, NovoTab)
+    ;   colocar_bomba(Tab, L, C, TabTemp),
+        K1 is K - 1,
+        espalhar(K1, TabTemp, N, NovoTab)
+    ).
 
 
 /*
