@@ -139,7 +139,7 @@ desenha_placar(Lmin, Cmin, Bombas) :-
     contador_bandeiras(N),
     R is (Bombas - N),
     move_to(Lmin - 2, Cmin),
-    format('Bandeiras restantes: ~w',[R]).
+    format('Bandeiras restantes: ~w   ',[R]).
 
 /* ---------------------------------------------------------
    jogo(+Lmin, +Cmin, +Lmax, +Cmax,
